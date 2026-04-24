@@ -21,6 +21,7 @@ export const SERIES: Record<string, SeriesConfig> = {
       'Understanding immunopeptidomics from first principles — data analysis, tools, and workflows.',
     coverGradient: 'from-blue-500 to-cyan-600',
     coverIcon: '🔬',
+    coverImage: '/images/series/immunopeptidomics-101.png',
   },
   'building-bioinformatics-saas': {
     title: 'Building a Bioinformatics SaaS',
