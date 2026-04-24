@@ -22,7 +22,7 @@ export default function SeriesPage() {
         </ViewAnimation>
       </Section>
       <Section className='p-4 lg:p-6'>
-        <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
+        <div className='grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3'>
           {seriesEntries.map(([slug, config], i) => {
             const chapters = getSeriesChapters(slug)
             return (
