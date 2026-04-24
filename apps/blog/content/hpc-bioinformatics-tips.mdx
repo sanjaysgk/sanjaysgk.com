@@ -1,0 +1,64 @@
+---
+title: "HPC for Bioinformatics: Practical Tips for SLURM Clusters"
+description: Hard-won lessons from running bioinformatics pipelines on HPC clusters — job scheduling, memory management, and debugging.
+date: 2026-04-20
+tags: ['bioinformatics', 'hpc', 'tutorial']
+author: Sanjay
+---
+
+After two years of running pipelines on the Monash M3 cluster, here are things I wish someone had told me on day one.
+
+## Always Request Resources Explicitly
+
+Don't rely on defaults. A job with no memory specification might get 1GB or 100GB depending on the partition.
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=neoantigen_pipeline
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=04:00:00
+#SBATCH --partition=comp
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --error=logs/%x_%j.err
+```
+
+## Use Array Jobs for Batch Processing
+
+If you're processing 33 cancer types, don't submit 33 individual jobs:
+
+```bash
+#SBATCH --array=1-33
+
+CANCER_TYPE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" cancer_types.txt)
+python process_cancer.py --cancer-type "$CANCER_TYPE"
+```
+
+## Java Tools Are Memory Hungry
+
+Tools like GATK and MSFragger run on the JVM. Always set both SLURM memory and JVM heap:
+
+```bash
+#SBATCH --mem=64G
+export _JAVA_OPTIONS="-Xmx56g"  # Leave headroom
+```
+
+## Debugging Failed Jobs
+
+| Exit Code | Meaning |
+|-----------|---------|
+| 0 | Success |
+| 1 | General error |
+| 137 | OOM killed (SIGKILL) |
+| 143 | Time limit (SIGTERM) |
+
+If you see 137, increase memory. If you see 143, increase time or optimise.
+
+## Use Workflow Managers
+
+For anything beyond a single script, use **Nextflow**:
+- Handles SLURM submission automatically
+- Resumes from failures
+- Tracks provenance and reproducibility
+- Docker/Singularity container support

@@ -42,7 +42,7 @@ const Hero = () => {
         <div className='flex items-center justify-center space-x-2'>
           <Icons.code className='h-6 w-6 text-primary transition-transform hover:scale-125' />
           <span className='font-medium text-muted-foreground text-sm'>
-            Full-Stack Developer & Tech Writer
+            Bioinformatician, Researcher & Builder
           </span>
         </div>
       </ViewAnimation>
@@ -64,9 +64,9 @@ const Hero = () => {
       >
         <p className='max-w-xl text-center text-muted-foreground md:max-w-2xl md:text-lg'>
           <Balancer>
-            I write about web development, software engineering, and the latest
-            technologies. I also create fun projects and tutorials to help you
-            learn and grow as a developer.
+            Writing about bioinformatics, computational biology, building
+            products, and the intersection of science and code. From cancer
+            neoantigen research to shipping side projects.
           </Balancer>
         </p>
       </ViewAnimation>

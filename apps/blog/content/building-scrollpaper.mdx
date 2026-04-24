@@ -1,0 +1,41 @@
+---
+title: "Building Scrollpaper: Making Research Papers Accessible"
+description: Why I built a mobile app that distills scientific papers into bite-sized daily reads, and what I learned shipping a React Native app.
+date: 2026-03-10
+tags: ['product', 'react-native', 'startup']
+author: Sanjay
+---
+
+I read a lot of papers. Or rather, I *try* to read a lot of papers. The reality is that most researchers are drowning in a backlog of PDFs they'll never get to. That's why I built Scrollpaper.
+
+## The Problem
+
+Academic papers are optimised for peer review, not comprehension. Dense jargon, walls of text, buried conclusions. Meanwhile, we spend hours scrolling through social media feeds designed to be addictive.
+
+What if we could apply the same feed-based UX to science?
+
+## The Solution
+
+Scrollpaper distills papers into bite-sized daily reads. The app uses Gemini AI to extract key findings, rewrite them in plain language, generate visual summaries, and deliver a personalised daily feed.
+
+```
+React Native + Expo    # Cross-platform mobile
+FastAPI + Python       # Backend API
+PostgreSQL             # Data storage
+Gemini AI              # Paper summarisation
+AWS Lambda             # Serverless processing
+```
+
+## Lessons From Shipping
+
+### Start ugly, ship fast
+
+The first version looked terrible. But it worked. I showed it to five researchers at Monash, and four asked when they could download it.
+
+### AI summarisation needs guardrails
+
+Raw LLM output from papers is unreliable. It hallucinates numbers and sometimes invents conclusions. Building the validation layer was the hardest engineering challenge.
+
+### Mobile is a different beast
+
+Coming from web, React Native felt familiar but the edge cases are brutal. iOS and Android handle text rendering, scroll physics, and notifications differently. Budget 30% more time than you think.

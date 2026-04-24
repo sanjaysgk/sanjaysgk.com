@@ -59,8 +59,8 @@ const jsonLd = {
       name: owner,
       url: baseUrlString,
       description: homeDescription,
-      jobTitle: 'Full-stack Developer',
-      knowsAbout: ['Next.js', 'React', 'TypeScript', 'Web Development', 'AI'],
+      jobTitle: 'Bioinformatician & Research Assistant',
+      knowsAbout: ['Bioinformatics', 'Cancer Genomics', 'Immunopeptidomics', 'Python', 'Machine Learning', 'Next.js'],
       sameAs: socialUrls,
     },
     {
