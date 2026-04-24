@@ -18,7 +18,7 @@ export function SeriesCover({ slug, config, chapterCount }: SeriesCoverProps) {
       {/* Cover */}
       <div
         className={cn(
-          'relative aspect-[3/4] rounded-2xl overflow-hidden',
+          'relative aspect-[85/110] rounded-2xl overflow-hidden',
           !config.coverImage && `bg-gradient-to-br ${config.coverGradient}`
         )}
       >
