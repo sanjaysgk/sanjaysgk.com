@@ -15,6 +15,11 @@ Blog (Home)              — Featured hero + all latest posts
 ├── Journal              — Personal & reflective
 │   ├── Notes            — Quick learnings, TILs, observations
 │   └── Thoughts         — Career reflections, opinions, life lessons
+├── Tools                — Software, hardware, and workflows I use daily
+│   ├── Research Tools   — Bioinformatics software, databases, HPC tools
+│   ├── Dev Tools        — IDE, CLI, frameworks, libraries
+│   ├── Productivity     — Apps, workflows, note-taking
+│   └── Hardware         — Machines, peripherals, lab equipment
 └── Tags                 — Cross-cutting tag-based discovery
 ```
 
@@ -23,7 +28,7 @@ Blog (Home)              — Featured hero + all latest posts
 Top-level nav tabs:
 
 ```
-Blog    Learn    Series    Journal    Tags
+Blog    Learn    Series    Journal    Tools    Tags
 ```
 
 - **Blog** (`/posts`) — All posts reverse-chronologically. Featured hero post at top, then grid of latest articles.
@@ -164,9 +169,114 @@ See all thoughts →
 ### `/journal/notes` (All Notes)
 ### `/journal/thoughts` (All Thoughts)
 
+### `/tools` (Tools Landing)
+
+A curated list of software, hardware, and workflows I use daily — grouped by category. Each tool is a card with name, description, icon/logo, and optional link.
+
+```
+Tools
+The software, hardware, and workflows I use for research and building.
+
+── Research Tools ────────────
+┌──────────┐ ┌──────────┐ ┌──────────┐
+│ NetMHCpan│ │ MSFragger│ │ STAR     │
+│ MHC bind.│ │ Proteom. │ │ RNA-seq  │
+│ predict. │ │ search   │ │ aligner  │
+└──────────┘ └──────────┘ └──────────┘
+
+── Dev Tools ─────────────────
+┌──────────┐ ┌──────────┐ ┌──────────┐
+│ VS Code  │ │ Cursor   │ │ iTerm2   │
+│ Editor   │ │ AI code  │ │ Terminal │
+└──────────┘ └──────────┘ └──────────┘
+
+── Productivity ──────────────
+┌──────────┐ ┌──────────┐ ┌──────────┐
+│ Notion   │ │ Obsidian │ │ Arc      │
+│ Notes &  │ │ Research │ │ Browser  │
+│ planning │ │ notes    │ │          │
+└──────────┘ └──────────┘ └──────────┘
+
+── Hardware ──────────────────
+┌──────────┐ ┌──────────┐
+│ MacBook  │ │ Monash M3│
+│ Pro M3   │ │ HPC Clstr│
+└──────────┘ └──────────┘
+```
+
+Tools data is defined in a config file (`src/constants/tools.ts`), not as MDX content. Each tool has: name, description, category, icon (URL or emoji), and optional link.
+
 ### `/tags` (Tags)
 - Grid of tag badges with post counts
 - Clicking filters to posts with that tag
+
+## Tools Data Structure
+
+Tools are defined in `src/constants/tools.ts`:
+
+```typescript
+interface Tool {
+  name: string;
+  description: string;
+  url?: string;           // Link to tool's website
+  icon?: string;          // URL to icon image or emoji
+}
+
+interface ToolCategory {
+  title: string;
+  description: string;
+  tools: Tool[];
+}
+
+export const TOOL_CATEGORIES: ToolCategory[] = [
+  {
+    title: "Research Tools",
+    description: "Bioinformatics software, databases, and HPC tools",
+    tools: [
+      { name: "NetMHCpan", description: "MHC binding affinity prediction", url: "https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/" },
+      { name: "MSFragger", description: "Ultrafast proteomics search engine", url: "https://msfragger.nesvilab.org/" },
+      { name: "STAR", description: "RNA-seq splice-aware aligner", url: "https://github.com/alexdobin/STAR" },
+      { name: "GATK", description: "Genome analysis toolkit", url: "https://gatk.broadinstitute.org/" },
+      { name: "AlphaFold", description: "Protein structure prediction", url: "https://alphafold.ebi.ac.uk/" },
+      { name: "Nextflow", description: "Workflow orchestration for pipelines", url: "https://www.nextflow.io/" },
+      { name: "MaxQuant", description: "Quantitative proteomics", url: "https://www.maxquant.org/" },
+    ],
+  },
+  {
+    title: "Dev Tools",
+    description: "IDE, CLI, frameworks, and libraries",
+    tools: [
+      { name: "VS Code", description: "Primary code editor" },
+      { name: "Cursor", description: "AI-powered code editor" },
+      { name: "Claude Code", description: "AI coding assistant in the terminal" },
+      { name: "iTerm2", description: "Terminal emulator for macOS" },
+      { name: "Docker", description: "Containerisation for reproducible environments" },
+      { name: "Next.js", description: "React framework for the web" },
+      { name: "Python", description: "Primary language for bioinformatics" },
+      { name: "FastAPI", description: "Modern Python web framework" },
+    ],
+  },
+  {
+    title: "Productivity",
+    description: "Apps, workflows, and note-taking",
+    tools: [
+      { name: "Notion", description: "Notes, planning, and project management" },
+      { name: "Obsidian", description: "Research notes and knowledge graph" },
+      { name: "Arc", description: "Browser for power users" },
+      { name: "Figma", description: "UI design and prototyping" },
+      { name: "Linear", description: "Project tracking for side projects" },
+    ],
+  },
+  {
+    title: "Hardware",
+    description: "Machines, peripherals, and infrastructure",
+    tools: [
+      { name: "MacBook Pro M3", description: "Daily driver for development" },
+      { name: "Monash M3 Cluster", description: "HPC cluster for bioinformatics pipelines" },
+    ],
+  },
+];
+```
 
 ## Auto-Generated Series Covers
 
