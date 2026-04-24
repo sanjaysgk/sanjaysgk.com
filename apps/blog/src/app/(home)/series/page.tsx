@@ -6,8 +6,8 @@ import { SERIES } from '@/constants/series'
 import { getSeriesChapters } from '@/lib/source'
 
 export const metadata: Metadata = {
-  title: 'Series',
-  description: 'Explore content series for research and technology.',
+  title: 'Volumes',
+  description: 'In-depth volumes on research, science, and technology.',
 }
 
 export default function SeriesPage() {
@@ -20,9 +20,9 @@ export default function SeriesPage() {
           initial={{ opacity: 0, translateY: -6 }}
           whileInView={{ opacity: 1, translateY: 0 }}
         >
-          <h1 className='text-2xl font-bold sm:text-3xl'>Series</h1>
+          <h1 className='text-2xl font-bold sm:text-3xl'>Volumes</h1>
           <p className='mt-1.5 text-sm text-muted-foreground'>
-            Explore content series for research and technology.
+            In-depth volumes on research, science, and technology.
           </p>
         </ViewAnimation>
       </Section>

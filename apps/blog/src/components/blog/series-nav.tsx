@@ -35,7 +35,7 @@ export function SeriesNav({
         href={`/series/${seriesSlug}`}
         className='text-xs font-medium text-muted-foreground hover:text-foreground transition-colors'
       >
-        Series: {seriesTitle}
+        Volume: {seriesTitle}
       </Link>
 
       <div className='relative mt-2'>

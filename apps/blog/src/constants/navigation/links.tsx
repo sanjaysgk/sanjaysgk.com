@@ -15,7 +15,7 @@ export const linkItems: LinkItemType[] = [
     active: 'nested-url',
   },
   {
-    text: 'Series',
+    text: 'Volumes',
     icon: <Icons.layers />,
     url: '/series',
     active: 'nested-url',
