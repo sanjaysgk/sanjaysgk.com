@@ -32,6 +32,11 @@ export const blog = defineCollections({
       }),
     author: z.string(),
     tags: z.array(z.string()).optional(),
+    category: z.enum(['research', 'tutorial', 'note', 'thought']).default('research'),
+    series: z.object({
+      name: z.string(),
+      order: z.number(),
+    }).optional(),
     image: z.string().optional(),
   }),
   postprocess: {

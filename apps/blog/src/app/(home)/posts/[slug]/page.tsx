@@ -5,11 +5,13 @@ import defaultMdxComponents from 'fumadocs-ui/mdx'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import BlogProgressBar from '@/components/blog/progress-bar'
+import { SeriesNav } from '@/components/blog/series-nav'
 import { PostJsonLd } from '@/components/json-ld'
 import { Section } from '@/components/section'
+import { SERIES } from '@/constants/series'
 import { description as homeDescription } from '@/constants/site'
 import { createMetadata, getBlogPageImage } from '@/lib/metadata'
-import { getPost, getPosts } from '@/lib/source'
+import { getPost, getPosts, getSeriesChapters } from '@/lib/source'
 import { Header } from './_components/header'
 import { Share } from './page.client'
 
@@ -24,6 +26,16 @@ export default async function Page(props: {
   }
   const { body: Mdx, toc, tags, lastModified } = page.data
 
+  const seriesName = page.data.series?.name
+  const seriesConfig = seriesName ? SERIES[seriesName] : null
+  const seriesChapters = seriesName
+    ? getSeriesChapters(seriesName).map((c) => ({
+        title: c.data.title,
+        url: c.url,
+        order: c.data.series?.order ?? 0,
+      }))
+    : []
+
   const lastUpdate = lastModified ? new Date(lastModified) : undefined
 
   return (
@@ -34,6 +46,14 @@ export default async function Page(props: {
       <Section className='h-full' sectionClassName='flex flex-1'>
         <article className='flex min-h-full flex-col lg:flex-row'>
           <div className='flex flex-1 flex-col gap-4'>
+            {seriesConfig && seriesName && (
+              <SeriesNav
+                seriesTitle={seriesConfig.title}
+                seriesSlug={seriesName}
+                chapters={seriesChapters}
+                currentOrder={page.data.series?.order ?? 0}
+              />
+            )}
             {toc?.length ? (
               <InlineTOC
                 className='rounded-none border-0 border-border border-b border-dashed'

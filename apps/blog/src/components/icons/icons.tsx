@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   AtSign,
+  BookOpen,
   Check,
   CheckCircle,
   ChevronDown,
@@ -21,6 +22,7 @@ import {
   Image,
   Info,
   Laptop,
+  Layers,
   Loader2,
   LogIn,
   LogOut,
@@ -43,6 +45,7 @@ import {
   Tags,
   Trash,
   User,
+  Wrench,
   X,
 } from 'lucide-react'
 
@@ -53,6 +56,9 @@ export const Icons = {
   close: X,
   menu: Menu,
   code: Code,
+  layers: Layers,
+  notebook: BookOpen,
+  wrench: Wrench,
   pencil: Pencil,
   copied: ClipboardCheck,
   success: CheckCircle,
