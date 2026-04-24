@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -31,36 +32,85 @@ export default async function SeriesDetailPage(props: {
 
   return (
     <>
-      <Section className='p-4 lg:p-6'>
-        <ViewAnimation initial={{ opacity: 0, translateY: -6 }} whileInView={{ opacity: 1, translateY: 0 }}>
-          <div className='flex flex-col items-center sm:flex-row gap-8'>
-            <div className={cn('h-48 w-36 shrink-0 rounded-xl flex flex-col items-center justify-center bg-gradient-to-br text-white', config.coverGradient)}>
-              <span className='text-5xl'>{config.coverIcon}</span>
+      {/* Hero: Cover + Title */}
+      <Section className='px-4 py-8 lg:px-6 lg:py-12'>
+        <ViewAnimation
+          initial={{ opacity: 0, translateY: -6 }}
+          whileInView={{ opacity: 1, translateY: 0 }}
+        >
+          <div className='flex flex-col gap-8 md:flex-row md:items-start'>
+            {/* Cover Image */}
+            <div
+              className={cn(
+                'relative aspect-[85/110] w-48 md:w-56 shrink-0 rounded-2xl overflow-hidden shadow-lg',
+                !config.coverImage &&
+                  `bg-gradient-to-br ${config.coverGradient}`
+              )}
+            >
+              {config.coverImage ? (
+                <img
+                  src={config.coverImage}
+                  alt={config.title}
+                  className='absolute inset-0 w-full h-full object-cover'
+                />
+              ) : (
+                <div className='flex items-center justify-center h-full'>
+                  <span className='text-6xl'>{config.coverIcon}</span>
+                </div>
+              )}
             </div>
-            <div className='flex-1'>
-              <h1 className='text-3xl font-bold tracking-tighter sm:text-4xl'>{config.title}</h1>
-              <p className='mt-2 text-muted-foreground'>{config.description}</p>
+
+            {/* Title + Description */}
+            <div className='flex-1 md:pt-4'>
+              <h1 className='text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl'>
+                {config.title}
+              </h1>
+              <p className='mt-3 text-muted-foreground text-base lg:text-lg leading-relaxed max-w-xl'>
+                {config.description}
+              </p>
             </div>
           </div>
         </ViewAnimation>
       </Section>
 
-      <Section className='p-4 lg:p-6'>
-        <ViewAnimation delay={0.05} initial={{ opacity: 0, translateY: -6 }} whileInView={{ opacity: 1, translateY: 0 }}>
-          <h2 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4'>Content</h2>
+      {/* Chapter List */}
+      <Section className='px-4 pb-8 lg:px-6'>
+        <ViewAnimation
+          delay={0.05}
+          initial={{ opacity: 0, translateY: -6 }}
+          whileInView={{ opacity: 1, translateY: 0 }}
+        >
+          <h2 className='text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-6'>
+            Content
+          </h2>
         </ViewAnimation>
-        <div className='flex flex-col divide-y divide-border'>
+
+        <div className='flex flex-col'>
           {chapters.length > 0 ? (
             chapters.map((chapter, i) => (
-              <ViewAnimation key={chapter.url} delay={0.05 * (i + 2)} initial={{ opacity: 0, translateY: -6 }} whileInView={{ opacity: 1, translateY: 0 }}>
-                <Link href={chapter.url} className='flex items-center gap-4 py-4 group hover:bg-muted/30 -mx-4 px-4 rounded-lg transition-colors'>
-                  <span className='text-lg font-semibold text-muted-foreground w-6 text-right'>{i + 1}</span>
-                  <span className='font-medium group-hover:text-primary transition-colors'>{chapter.data.title}</span>
+              <ViewAnimation
+                key={chapter.url}
+                delay={0.05 * (i + 2)}
+                initial={{ opacity: 0, translateY: -6 }}
+                whileInView={{ opacity: 1, translateY: 0 }}
+              >
+                <Link
+                  href={chapter.url}
+                  className='group flex items-center gap-5 py-4 border-b border-border transition-colors hover:bg-muted/20 -mx-4 px-4'
+                >
+                  <span className='text-base font-medium text-muted-foreground/60 w-6 text-right tabular-nums'>
+                    {i + 1}
+                  </span>
+                  <span className='text-[15px] font-medium group-hover:text-primary transition-colors'>
+                    {chapter.data.title}
+                  </span>
                 </Link>
               </ViewAnimation>
             ))
           ) : (
-            <p className='py-8 text-center text-muted-foreground'>Chapters coming soon.</p>
+            <p className='py-12 text-center text-muted-foreground'>
+              Chapters coming soon.
+            </p>
           )}
         </div>
       </Section>
