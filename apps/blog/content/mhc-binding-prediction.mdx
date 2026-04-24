@@ -1,0 +1,93 @@
+---
+title: "MHC Binding Prediction with NetMHCpan"
+description: "How MHC binding prediction works, why NetMHCpan is the gold standard, and the practical challenges of running predictions at scale."
+date: 2026-04-24
+tags: ['bioinformatics', 'immunoinformatics', 'machine-learning']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 3
+---
+
+A mutant peptide is only useful as a neoantigen if it can **bind to MHC molecules** and be presented on the cell surface. Predicting which peptides bind — and how strongly — is arguably the most critical computational step in the neoantigen discovery pipeline.
+
+## The Biology of MHC Binding
+
+MHC Class I molecules have a peptide-binding groove that accommodates peptides of 8-14 amino acids (typically 9-mers). The groove has anchor positions — specific pockets (usually positions 2 and 9 for a 9-mer) that strongly prefer certain amino acids.
+
+The key insight: **MHC binding is allele-specific**. Each person carries up to 6 different HLA Class I alleles (two each of HLA-A, HLA-B, and HLA-C). A peptide that binds strongly to HLA-A*02:01 may not bind at all to HLA-A*03:01. This is why neoantigen prediction is inherently personalised.
+
+There are over **27,000 known HLA alleles** in the human population. No experimental assay can test binding for all of them. This is where computational prediction becomes essential.
+
+## How NetMHCpan Works
+
+NetMHCpan is a neural network-based tool developed at DTU (Technical University of Denmark). It's consistently ranked as the top performer in community benchmarks for MHC binding prediction.
+
+The approach:
+
+1. **Training data** — Binding affinity measurements (IC50 values) from thousands of peptide-MHC experiments, plus mass spectrometry eluted ligand data
+2. **Sequence encoding** — Both the peptide sequence and the MHC pseudo-sequence (the amino acids lining the binding groove) are encoded numerically
+3. **Neural network** — A feed-forward network learns the mapping from peptide + MHC features to binding affinity
+4. **Pan-specific prediction** — By including the MHC sequence as input (not just the allele name), NetMHCpan can predict binding for alleles it has never seen in training data
+
+### Key Output Metrics
+
+NetMHCpan provides several output values for each prediction:
+
+| Metric | What it means | Typical threshold |
+|--------|---------------|-------------------|
+| **IC50 (nM)** | Predicted binding affinity | Under 500 nM = binder, under 50 nM = strong binder |
+| **%Rank** | Percentile rank against random peptides | Under 2% = binder, under 0.5% = strong binder |
+| **EL score** | Eluted ligand likelihood | Higher = more likely to be naturally presented |
+
+The `%Rank` is generally preferred over raw IC50 because it's comparable across alleles. An IC50 of 200 nM might be a strong binder for one allele but weak for another.
+
+## Running NetMHCpan at Scale
+
+For CAN-IMMUNE, we needed to predict binding for **1.2 million peptides** against multiple HLA alleles. This is computationally expensive.
+
+### The Scale Problem
+
+```
+1,194,608 peptides × 6 HLA alleles per person = ~7.2 million predictions per patient
+```
+
+For a pan-cancer database covering common HLA alleles, the numbers get much larger. We ran predictions against the most frequent HLA alleles in each population, resulting in hundreds of millions of individual predictions.
+
+### Practical Tips
+
+**Batch your predictions.** NetMHCpan accepts FASTA input files. Don't submit one peptide at a time — batch 10,000-50,000 peptides per run.
+
+```bash
+# Generate FASTA from peptide list
+awk '{print ">"NR"\n"$1}' peptides.txt > peptides.fasta
+
+# Run NetMHCpan
+netMHCpan -a HLA-A02:01 -f peptides.fasta -l 9 > results.txt
+```
+
+**Use SLURM arrays** for parallelisation across alleles:
+
+```bash
+#SBATCH --array=1-6
+HLA=$(sed -n "${SLURM_ARRAY_TASK_ID}p" hla_alleles.txt)
+netMHCpan -a "$HLA" -f peptides.fasta -l 9 > "results_${HLA}.txt"
+```
+
+**Parse output carefully.** NetMHCpan's output format is fixed-width columns, not CSV. We wrote a custom parser that handles edge cases (peptides with unusual amino acids, allele name formatting differences between versions).
+
+## Limitations and Caveats
+
+MHC binding prediction is necessary but not sufficient for neoantigen discovery:
+
+1. **Binding ≠ presentation** — A peptide may bind MHC in vitro but never be naturally processed and presented in a cell
+2. **Presentation ≠ immunogenicity** — A presented peptide may not trigger a T-cell response if no T-cell receptor in the repertoire recognises it
+3. **Prediction accuracy varies by allele** — Well-studied alleles (HLA-A*02:01) have much better prediction accuracy than rare alleles
+4. **Training data bias** — Most training data comes from a few well-characterised alleles, creating a bias toward those alleles
+
+This is why experimental validation through mass spectrometry (Chapter 5) is essential — computational predictions are hypotheses that need to be tested.
+
+---
+
+*Next chapter: Building CAN-IMMUNE — architecture and engineering decisions →*

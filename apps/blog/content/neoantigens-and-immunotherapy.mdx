@@ -1,0 +1,80 @@
+---
+title: "What Are Neoantigens and Why They Matter for Immunotherapy"
+description: "An introduction to cancer neoantigens — how mutations create unique peptide targets that the immune system can exploit, and why this matters for the future of cancer treatment."
+date: 2026-04-24
+tags: ['bioinformatics', 'cancer', 'immunotherapy']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 1
+---
+
+Every cancer is a story of mutations gone wrong. As tumour cells divide, they accumulate somatic mutations — changes in their DNA that distinguish them from normal cells. Some of these mutations alter the proteins a cell produces, creating **neoantigens**: novel peptide sequences that don't exist anywhere in the healthy human body.
+
+This is what makes neoantigens so compelling for immunotherapy. They are *uniquely tumour-specific*. The immune system has never seen them before, which means there's no central tolerance protecting them — no built-in mechanism telling T-cells to leave them alone.
+
+## The MHC Presentation Pathway
+
+For a neoantigen to be useful therapeutically, it needs to be **presented** on the surface of a cancer cell. This happens through the Major Histocompatibility Complex (MHC) pathway:
+
+1. **Protein degradation** — The mutant protein is chopped into short peptides (8-14 amino acids for MHC Class I) by the proteasome
+2. **Peptide transport** — These peptides are transported into the endoplasmic reticulum by TAP proteins
+3. **MHC binding** — Peptides that fit into the binding groove of MHC molecules are loaded onto them
+4. **Surface presentation** — The peptide-MHC complex is displayed on the cell surface
+5. **T-cell recognition** — Cytotoxic T-cells (CD8+) scan these complexes; if a T-cell receptor recognises the neoantigen, it triggers an immune attack
+
+The critical bottleneck is step 3: **not every mutant peptide binds to MHC**. The binding groove is highly specific — it depends on the patient's HLA type (the human version of MHC). This is why neoantigen discovery is fundamentally a computational problem.
+
+## Why Neoantigens Beat Tumour-Associated Antigens
+
+Before neoantigens, immunotherapy research focused on **tumour-associated antigens (TAAs)** — proteins that are overexpressed in cancer but also present in normal tissues. The problem? The immune system has partial tolerance to these proteins because it has seen them before. This leads to weaker immune responses and potential autoimmunity.
+
+Neoantigens solve both problems:
+
+| Property | Tumour-Associated Antigens | Neoantigens |
+|----------|---------------------------|-------------|
+| Expression | Overexpressed in tumour, present in normal | Exclusively in tumour |
+| Immune tolerance | Partial — T-cells may be deleted | None — completely novel |
+| Autoimmunity risk | Higher | Minimal |
+| Specificity | Shared across cancer types | Patient-specific (mostly) |
+| Therapeutic potential | Limited | High |
+
+## The Computational Challenge
+
+Here's where it gets interesting from a bioinformatics perspective. To identify actionable neoantigens, you need to:
+
+1. **Sequence the tumour** — Whole exome or whole genome sequencing to find somatic mutations
+2. **Call variants** — Identify which mutations are somatic (tumour-specific) vs germline
+3. **Predict protein changes** — Map DNA mutations to amino acid substitutions
+4. **Generate candidate peptides** — Enumerate all possible mutant peptides of relevant lengths
+5. **Predict MHC binding** — Use tools like NetMHCpan to predict which peptides will bind to the patient's HLA alleles
+6. **Prioritize candidates** — Rank by binding affinity, expression level, clonality, and other features
+
+Each step introduces uncertainty. Variant calling has false positives. MHC binding prediction has ~80-90% accuracy at best. Expression doesn't guarantee presentation. This cascade of uncertainties is why we need **large-scale databases** to validate computational predictions against experimental observations.
+
+## From Theory to Practice
+
+Several clinical approaches exploit neoantigens:
+
+**Personalised cancer vaccines** — Sequence a patient's tumour, predict their neoantigens, synthesize a custom vaccine containing those peptides. Companies like BioNTech (yes, the COVID vaccine company) and Moderna are running clinical trials for personalised mRNA cancer vaccines encoding patient-specific neoantigens.
+
+**Adoptive T-cell therapy** — Isolate T-cells from a patient, expand those that recognise tumour neoantigens, and infuse them back. This approach has shown remarkable responses in melanoma and other solid tumours.
+
+**Checkpoint inhibitor biomarkers** — Tumours with high neoantigen burden (many mutations) tend to respond better to checkpoint inhibitors like pembrolizumab. Neoantigen load is emerging as a predictive biomarker for immunotherapy response.
+
+## What This Volume Covers
+
+In the following chapters, we'll trace the entire computational pipeline for neoantigen discovery:
+
+- **Chapter 2**: The mutation landscape — where the data comes from (COSMIC, CCLE) and the data engineering challenges
+- **Chapter 3**: MHC binding prediction — how NetMHCpan works and its limitations
+- **Chapter 4**: Building CAN-IMMUNE — the platform I built to make this data accessible
+- **Chapter 5**: LC-MS/MS validation — bridging computation and wet-lab proteomics
+- **Chapter 6**: The future — where personalised cancer vaccines are heading
+
+The goal is to take you from "what is a neoantigen?" to "how do we computationally discover them at scale?" — with enough technical depth to be useful, and enough context to understand why it matters.
+
+---
+
+*Next chapter: The mutation landscape — COSMIC, CCLE, and the data problem →*

@@ -1,0 +1,135 @@
+---
+title: "Building CAN-IMMUNE — Architecture and Engineering Decisions"
+description: "The technical story behind CAN-IMMUNE: why Flask over Django, why Elasticsearch for 1.2M peptides, and lessons from building a research platform."
+date: 2026-04-24
+tags: ['bioinformatics', 'python', 'engineering', 'elasticsearch']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 4
+---
+
+Building a research database platform is different from building a typical web application. Your users are scientists. They want to query data in ways you didn't anticipate. They need to download results in formats you haven't heard of. And the data changes every time a new COSMIC release drops.
+
+This chapter covers the architectural decisions behind CAN-IMMUNE and the engineering trade-offs we made.
+
+## The Requirements
+
+What researchers needed:
+1. **Search** mutant peptides by cancer type, gene, tissue, cell line, or peptide sequence
+2. **Filter** by mutation type (SNV, insertion, deletion), MHC binding affinity, peptide length
+3. **Browse** the mutation landscape across cancer types with summary statistics
+4. **Download** custom peptide libraries for LC-MS/MS experiments
+5. **Cross-reference** mutations across COSMIC and CCLE data sources
+
+## The Stack
+
+```
+Python 3.10
+├── Flask                  # Web framework
+├── MySQL 8.0              # Relational storage (mutations, peptides, metadata)
+├── Elasticsearch 8.x      # Full-text search + faceted filtering
+├── SQLAlchemy             # ORM for MySQL
+├── Celery + Redis         # Background task queue for large exports
+└── Gunicorn + Nginx       # Production serving
+```
+
+### Why Flask Over Django?
+
+Django's ORM, admin panel, and authentication system are excellent for CRUD applications. But CAN-IMMUNE is primarily a **data exploration tool**. We needed:
+
+- Custom query endpoints that don't map to standard REST patterns
+- Complex Elasticsearch queries that bypass the ORM entirely
+- Flexible response formats (JSON, CSV, FASTA)
+
+Flask's lightweight routing and lack of ORM opinions gave us the freedom to build exactly what we needed without fighting framework conventions.
+
+### Why Elasticsearch?
+
+With 1.2 million mutant peptides and 6.7 million mutations, the query patterns are complex:
+
+> "Show me all 9-mer peptides from BRAF mutations in melanoma cell lines with predicted IC50 < 500 nM for HLA-A*02:01"
+
+This involves:
+- Full-text search (gene name)
+- Faceted filtering (cancer type, cell line type)
+- Range filtering (peptide length, binding affinity)
+- Exact match (HLA allele)
+
+MySQL can handle this with compound indices, but the query time scales poorly as you add facets. Elasticsearch handles this natively with inverted indices and aggregation pipelines, giving us sub-second responses for any combination of filters.
+
+### The Dual-Database Architecture
+
+We use both MySQL and Elasticsearch, each for what it does best:
+
+```
+MySQL (source of truth)
+├── Mutations table (6.7M rows)
+├── Peptides table (1.2M rows)
+├── Cancer types, cell lines, tissues (reference tables)
+└── User queries, exports (transactional data)
+
+Elasticsearch (search index)
+├── Peptides index (denormalized: peptide + mutation + cancer type + cell line)
+├── Mutations index (for mutation-centric queries)
+└── Statistics index (pre-computed aggregations)
+```
+
+Data flows one way: MySQL → Elasticsearch. We run a nightly sync job that detects changes in MySQL and updates the corresponding Elasticsearch documents.
+
+## Data Model Design
+
+The key insight was **denormalisation for search**. In MySQL, data is normalised across multiple tables (mutations, peptides, cancer types, cell lines). In Elasticsearch, each peptide document contains everything needed to render a search result:
+
+```json
+{
+  "peptide_id": "CANLIB001234",
+  "sequence": "YMDGTMSQV",
+  "length": 9,
+  "gene": "BRAF",
+  "mutation": "V600E",
+  "cancer_type": "Melanoma",
+  "cell_line": "A375",
+  "tissue": "Skin",
+  "hla_allele": "HLA-A*02:01",
+  "ic50": 42.3,
+  "rank": 0.15,
+  "source": "COSMIC"
+}
+```
+
+This means each peptide appears multiple times (once per HLA allele prediction), but search is fast because no joins are needed.
+
+## The Export Pipeline
+
+Researchers don't just browse — they download. A typical export request:
+
+> "Give me all mutant peptides for colorectal cancer, 8-11 mers, in FASTA format"
+
+This can produce files with 100,000+ sequences. Generating these synchronously would time out. Instead:
+
+1. User submits export request via web form
+2. Flask validates parameters and creates a Celery task
+3. Celery worker queries Elasticsearch, generates the file, uploads to temporary storage
+4. User receives an email with a download link (link expires after 72 hours)
+
+## Deployment
+
+CAN-IMMUNE runs on institutional infrastructure at Monash:
+
+- **Application server**: 4-core VM running Flask + Gunicorn behind Nginx
+- **MySQL**: Managed database service
+- **Elasticsearch**: Single-node cluster with 16GB heap (sufficient for our index size)
+- **HPC connection**: The data pipeline runs on M3 cluster; results are pushed to the production database via secure transfer
+
+## What I'd Do Differently
+
+1. **Use FastAPI instead of Flask** — Automatic OpenAPI docs, native async support, and Pydantic validation would have saved time
+2. **Consider ClickHouse over Elasticsearch** — For analytical queries (aggregations, statistics), a columnar database might have been a better fit
+3. **Build the API first** — We built the web UI and API simultaneously. Building the API first would have led to a cleaner separation of concerns
+4. **Add data versioning from day one** — We retrofitted COSMIC version tracking after the first update broke reproducibility
+
+---
+
+*Next chapter: LC-MS/MS validation — bridging computation and wet lab →*

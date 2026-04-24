@@ -1,0 +1,97 @@
+---
+title: "LC-MS/MS Validation — Bridging Computation and Wet Lab"
+description: "How mass spectrometry validates computational neoantigen predictions, and what happens when your in silico peptides meet real-world proteomics data."
+date: 2026-04-24
+tags: ['bioinformatics', 'proteomics', 'mass-spectrometry']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 5
+---
+
+Computational prediction gives you candidates. Mass spectrometry tells you which ones are real. This chapter covers how LC-MS/MS (Liquid Chromatography-Tandem Mass Spectrometry) validates neoantigen predictions and why it's the gold standard for immunopeptidomics.
+
+## Why Validation Matters
+
+In the previous chapters, we generated 1.2 million candidate mutant peptides and predicted their MHC binding affinities. But these are **predictions**, not observations. A peptide with a predicted IC50 of 10 nM for HLA-A*02:01 might never actually be processed, loaded onto MHC, and presented on the cell surface.
+
+The gap between prediction and reality is significant:
+- Only ~1-5% of predicted strong binders are actually detected by mass spectrometry
+- Many peptides are degraded before reaching the MHC loading complex
+- Post-translational modifications can alter peptide identity
+- Expression level of the source protein matters enormously
+
+## How LC-MS/MS Works for Immunopeptidomics
+
+The immunopeptidomics workflow:
+
+1. **Cell culture** — Grow cancer cell lines (e.g., from CCLE) in sufficient quantity
+2. **MHC immunoprecipitation** — Use antibodies (typically W6/32 for pan-Class I) to pull down MHC-peptide complexes from cell lysates
+3. **Peptide elution** — Acid-elute the bound peptides, separating them from MHC molecules
+4. **LC-MS/MS analysis** — Separate peptides by liquid chromatography, then fragment them in the mass spectrometer to determine their sequences
+5. **Database search** — Match the observed spectra against a protein database to identify peptide sequences
+
+### The Search Database Problem
+
+This is where CAN-IMMUNE becomes critical. Standard proteomics searches use reference protein databases (UniProt). But neoantigens **don't exist in reference databases** — they're novel sequences created by somatic mutations.
+
+To detect neoantigens by mass spectrometry, you need a **custom search database** that includes mutant peptide sequences alongside the normal proteome. This is exactly what CAN-IMMUNE provides: cancer-type-specific libraries of mutant peptides that can be appended to standard search databases.
+
+```
+Standard search database:
+  UniProt human proteome (20,000 proteins)
+  + Common contaminants
+
+Neoantigen-aware search database:
+  UniProt human proteome (20,000 proteins)
+  + Common contaminants
+  + CAN-IMMUNE mutant peptides for melanoma (N peptides)
+```
+
+### MSFragger for Fast Searching
+
+We use MSFragger for database searching because of its speed. MSFragger uses a fragment-ion indexing approach that's 10-100x faster than traditional search engines like Mascot or SEQUEST.
+
+For a typical immunopeptidomics dataset (50,000-200,000 spectra) searched against an expanded database (reference + mutant peptides), MSFragger completes in minutes rather than hours.
+
+## Peptide Rescoring
+
+Raw search engine results contain false positives. We apply a rescoring pipeline:
+
+1. **FDR control** — Apply target-decoy approach to control false discovery rate at 1%
+2. **Length filtering** — Keep only peptides of 8-14 amino acids (MHC Class I) or 12-20 (Class II)
+3. **PTM filtering** — Remove peptides with excessive modifications that might indicate chemical artifacts
+4. **Spectral quality** — Filter by Percolator or PeptideProphet scores
+
+## What We've Found
+
+The validation results from CAN-IMMUNE are encouraging:
+
+- **Mutant peptide detection**: We've confirmed the presence of computationally predicted mutant peptides in LC-MS/MS data from multiple cell lines
+- **Binding affinity correlation**: Detected mutant peptides tend to have stronger predicted binding affinities than undetected ones, validating the prediction approach
+- **Cancer-type specificity**: Different cancer types show distinct mutant peptide profiles, consistent with their unique mutation landscapes
+
+## The Feedback Loop
+
+The real value is in the feedback loop between computation and experiment:
+
+```
+Computational prediction
+    ↓
+Generate candidate peptide library
+    ↓
+LC-MS/MS experiment with custom database
+    ↓
+Identify confirmed neoantigens
+    ↓
+Refine prediction models with new training data
+    ↓
+Better predictions
+```
+
+Each iteration improves prediction accuracy. This is why CAN-IMMUNE is designed as a living database — new experimental data continuously validates and refines the computational predictions.
+
+---
+
+*Next chapter: The future — personalised cancer vaccines →*

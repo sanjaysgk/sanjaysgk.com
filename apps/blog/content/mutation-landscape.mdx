@@ -1,0 +1,112 @@
+---
+title: "The Mutation Landscape — COSMIC, CCLE, and the Data Problem"
+description: "Where somatic mutation data comes from, how it's structured, and why data engineering is the hardest part of neoantigen discovery."
+date: 2026-04-24
+tags: ['bioinformatics', 'cancer', 'data-engineering']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 2
+---
+
+Before you can predict neoantigens, you need mutations. And before you can use mutations, you need to understand where the data comes from, how messy it is, and why cleaning it takes more time than any algorithm you'll write.
+
+## The Two Major Sources
+
+### COSMIC (Catalogue of Somatic Mutations in Cancer)
+
+COSMIC is the world's largest database of somatic mutations in cancer. Maintained by the Wellcome Sanger Institute, it catalogues mutations identified across thousands of published studies and large-scale sequencing projects.
+
+Key facts:
+- Over **7 million coding mutations** across all cancer types
+- Covers point mutations, insertions, deletions, and structural variants
+- Curated from published literature and large-scale screens (TCGA, ICGC)
+- Organised by gene, cancer type, tissue, and histology
+
+The challenge with COSMIC is **heterogeneity**. Mutations come from different studies using different sequencing technologies, variant callers, and quality filters. A mutation called in a 2012 exome study may not meet the standards of a 2024 whole-genome analysis.
+
+### CCLE (Cancer Cell Line Encyclopedia)
+
+CCLE provides genomic data for over **1,400 human cancer cell lines**. Unlike COSMIC (which is largely patient-derived), CCLE gives you a controlled experimental system — cell lines that researchers can actually work with in the lab.
+
+Key advantages:
+- Matched mutation, expression, and drug sensitivity data
+- Cell lines are purchasable — predictions can be experimentally validated
+- Covers 33 cancer types and 43 tissue sites
+- Standardised variant calling pipeline
+
+## The Data Engineering Challenge
+
+Here's what nobody tells you about working with mutation databases: **the data is not ready to use**.
+
+### Problem 1: Coordinate Systems
+
+Genomic positions can be reported in different genome builds (GRCh37 vs GRCh38). A mutation at `chr7:55259515` in GRCh37 is at a completely different position in GRCh38. You need to liftover coordinates consistently across all your data sources.
+
+### Problem 2: Variant Representation
+
+The same mutation can be described multiple ways:
+- `p.V600E` (protein level — valine to glutamic acid at position 600)
+- `c.1799T>A` (coding DNA level)
+- `chr7:140453136:A>T` (genomic level)
+
+You need to normalise all representations to a single format. We chose to work at the protein level because that's what matters for neoantigen prediction.
+
+### Problem 3: Duplicate Entries
+
+The same mutation may appear multiple times in COSMIC — once from each study that identified it. Naive deduplication doesn't work because the same amino acid change in the same gene might have different genomic origins (different codons encoding the same substitution).
+
+### Problem 4: Mapping to Protein Sequences
+
+Mutations need to be mapped to **UniProt protein sequences** to generate candidate peptides. But gene identifiers in COSMIC don't always map cleanly to UniProt accessions. You need to handle:
+- Multiple transcript isoforms per gene
+- Retired or merged UniProt entries
+- Discrepancies between Ensembl and UniProt annotations
+
+## Our Pipeline
+
+For CAN-IMMUNE, we built a multi-stage data pipeline:
+
+```
+COSMIC + CCLE mutations
+    ↓ (normalise coordinates, deduplicate)
+Filtered somatic mutations
+    ↓ (map to UniProt via gene symbols + Ensembl cross-refs)
+Protein-level mutations
+    ↓ (generate sliding window peptides: 8-14 aa for Class I, 12-20 for Class II)
+1.2M candidate mutant peptides
+    ↓ (index in MySQL + Elasticsearch)
+Queryable database
+```
+
+The entire pipeline runs on the Monash M3 HPC cluster using SLURM job arrays — one job per cancer type, 33 in parallel. Total processing time: approximately 72 hours.
+
+## The Numbers
+
+After processing, CAN-IMMUNE contains:
+
+| Metric | Count |
+|--------|-------|
+| Cancer types | 33 |
+| Cell lines | 1,460 |
+| Somatic mutations | 6,721,816 |
+| Tissue sites | 43 |
+| Mutant peptides | 1,194,608 |
+| Genes covered | 19,768 |
+
+These numbers represent the largest curated collection of cancer mutant peptides to date, spanning the full breadth of human cancer types represented in COSMIC and CCLE.
+
+## Lessons Learned
+
+1. **Data cleaning is the job** — I spent 60% of the project on data engineering, 20% on the web platform, and 20% on analysis. This ratio is normal for bioinformatics.
+
+2. **Version everything** — COSMIC releases quarterly updates. If you don't pin your data version, your results become unreproducible.
+
+3. **Validate against known biology** — When BRAF V600E (the most well-known cancer mutation) didn't appear in your processed data, you know something is wrong with your pipeline.
+
+4. **Build incrementally** — Don't try to process all 33 cancer types at once. Start with one (we used melanoma — well-studied, high mutation burden), validate the pipeline end-to-end, then scale.
+
+---
+
+*Next chapter: MHC binding prediction with NetMHCpan →*

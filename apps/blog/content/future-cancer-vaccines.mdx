@@ -1,0 +1,83 @@
+---
+title: "The Future — Personalised Cancer Vaccines"
+description: "Where neoantigen-based immunotherapy is heading: mRNA vaccines, AI-driven prediction, and the path from research to clinic."
+date: 2026-04-24
+tags: ['bioinformatics', 'cancer', 'immunotherapy', 'future']
+category: research
+author: Sanjay
+series:
+  name: cancer-neoantigen-discovery
+  order: 6
+---
+
+We've covered the science, the data, the algorithms, and the validation. Now let's look forward. Where is neoantigen-based immunotherapy heading, and what role does computational biology play in getting us there?
+
+## The Promise of mRNA Cancer Vaccines
+
+The COVID-19 pandemic demonstrated that mRNA vaccine technology works at scale. BioNTech and Moderna — the same companies that delivered billions of COVID vaccine doses — are now applying the same platform to cancer.
+
+The concept is elegant:
+1. Sequence a patient's tumour
+2. Identify their unique neoantigens computationally
+3. Encode those neoantigens in a personalised mRNA vaccine
+4. Inject the vaccine to train the patient's immune system to attack the tumour
+
+BioNTech's autogene cevumeran (BNT122) has shown promising results in pancreatic cancer — one of the most lethal and treatment-resistant cancers. In a Phase I trial, patients who developed neoantigen-specific T-cell responses had significantly longer recurrence-free survival.
+
+Moderna's mRNA-4157 (V940), combined with pembrolizumab, reduced the risk of melanoma recurrence by 44% in a Phase IIb trial. This is now in Phase III — the final step before potential approval.
+
+## The Computational Bottleneck
+
+Here's the challenge: **speed**. Current neoantigen prediction pipelines take days to weeks to process a patient's data. For a personalised cancer vaccine, the clock starts ticking the moment the tumour is biopsied. The patient may not have months to wait.
+
+The computational steps that need to be accelerated:
+- Variant calling from sequencing data (hours to days)
+- Neoantigen prediction and ranking (hours)
+- Vaccine design and optimisation (days)
+- Manufacturing quality checks (days)
+
+BioNTech has demonstrated a turnaround time of approximately 6 weeks from biopsy to vaccine delivery. The computational component needs to be reduced to hours, not days.
+
+## AI-Driven Neoantigen Prediction
+
+The next generation of prediction tools is moving beyond simple MHC binding prediction. New models incorporate:
+
+**Antigen processing prediction** — Will the proteasome actually generate this peptide? Tools like NetChop predict proteasomal cleavage sites, filtering out peptides that would never be produced.
+
+**Immunogenicity prediction** — A peptide can bind MHC and be presented, but will it trigger a T-cell response? This depends on the T-cell repertoire, which varies between individuals. Deep learning models trained on T-cell reactivity data are emerging.
+
+**Structural prediction** — AlphaFold and related tools can now predict peptide-MHC complex structures. This enables physics-based assessment of binding stability, complementing the statistical approaches used by NetMHCpan.
+
+**Multi-omic integration** — Combining genomics (mutations), transcriptomics (expression), proteomics (presentation), and immunopeptidomics (confirmed ligands) in a single prediction framework.
+
+## Where CAN-IMMUNE Fits
+
+CAN-IMMUNE was built to address a specific gap: the lack of a comprehensive, pre-computed database of cancer mutant peptides. As the field moves toward clinical applications, several extensions are planned:
+
+1. **API access** — Programmatic access for pipeline integration, enabling automated neoantigen ranking as part of clinical decision-support systems
+
+2. **Population-level analysis** — Which neoantigens are shared across patients with the same cancer type? Shared neoantigens could enable "off-the-shelf" cancer vaccines that don't require patient-specific manufacturing
+
+3. **AlphaFold integration** — Structural predictions for peptide-MHC complexes, adding a structural dimension to the binding affinity predictions
+
+4. **Clinical annotation** — Linking predicted neoantigens to clinical outcomes from published immunotherapy trials
+
+## The Bigger Picture
+
+Cancer immunotherapy is shifting from a one-size-fits-all approach (checkpoint inhibitors) to a personalised precision approach (neoantigen vaccines). Computational biology is the engine driving this transition.
+
+The tools we build today — databases like CAN-IMMUNE, prediction algorithms like NetMHCpan, validation pipelines using mass spectrometry — are the infrastructure on which personalised cancer vaccines will be built.
+
+We're not there yet. The prediction accuracy needs to improve. The computational speed needs to increase. The clinical validation needs to expand. But the trajectory is clear, and the progress in the last five years has been remarkable.
+
+## What Excites Me Most
+
+Honestly? The convergence. I started as a civil engineer, taught myself to code, studied data science, and ended up at the intersection of computation and cancer biology. This field needs people who can bridge the gap between algorithms and biology, between prediction and experiment, between data engineering and clinical application.
+
+If you've read this entire volume — from "what is a neoantigen?" to "where are personalised cancer vaccines heading?" — you now have the conceptual foundation to understand one of the most important frontiers in modern medicine.
+
+The next step is to build. To improve the predictions, to validate the hypotheses, to bring computational neoantigen discovery closer to the clinic. That's what gets me up in the morning.
+
+---
+
+*This is the final chapter of the Cancer Neoantigen Discovery volume. Return to the [volume overview](/series/cancer-neoantigen-discovery) to revisit any chapter.*
